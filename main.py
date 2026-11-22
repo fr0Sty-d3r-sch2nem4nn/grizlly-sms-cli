@@ -1,5 +1,8 @@
 from CommandEngine import CommandEngine
+
+command_engine = CommandEngine()
+
 def main():
-    CommandEngine().command_run()
+    command_engine.command_run()
     
 main()
