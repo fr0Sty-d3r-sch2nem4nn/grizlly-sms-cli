@@ -4,19 +4,21 @@ from utilities.ApiHandler import ApiHandler, grizzly_api_key
 
 class CommandEngine:
     def __init__(self):
-        try:
             self.arguments = ArgumentParser().arguments
             self.api_handler = ApiHandler()
 
             if(grizzly_api_key is None):
-                raise Exception("The key has not been provided you have to provide the")
-        
-        except Exception as error:
-            print("Exception occured during command engine setup !", error)
+                print("You haven't set up the API-key ! Without it, you will not be able to perform any action related to your account.")
+                self.api_handler.provide_api_key()
+                return
 
     def command_run(self):
         try:
-            pass
+            for arg_tuple in self.arguments._get_kwargs():
+                # print(arg_tuple)
+                if self.api_handler.static_methods.get(arg_tuple[0]) and arg_tuple[1]:
+                    self.api_handler.static_methods[arg_tuple[0]]()
+                    return
         
         except Exception as error:
             print("Command run error: ", error)
