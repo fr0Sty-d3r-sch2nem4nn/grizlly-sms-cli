@@ -85,18 +85,22 @@ class ApiHandler:
             print("Balance retrieval error: ", error)
 
     def get_active_activations_list(self):
-        GET_ACTIVE_ACTIVATIONS = f"https://api.grizzlysms.com/stubs/handler_api.php?api_key={grizzly_api_key}&action=getActiveActivations"
+        try:
+            GET_ACTIVE_ACTIVATIONS = f"https://api.grizzlysms.com/stubs/handler_api.php?api_key={grizzly_api_key}&action=getActiveActivations"
 
-        request_response = request(method="GET", url=GET_ACTIVE_ACTIVATIONS)
+            request_response = request(method="GET", url=GET_ACTIVE_ACTIVATIONS)
 
-        jsoned_response = request_response.json()
+            jsoned_response = request_response.json()
 
-        if jsoned_response is None:
-            print("No activations are active yet !")
-            return
+            if jsoned_response is None:
+                print("No activations are active yet !")
+                return
+
+            for key, value in jsoned_response.items():
+                print(f'{key}: {value}')
         
-        print(jsoned_response)
-
+        except Exception as error:
+            print("Error occured while retrieving activation list", error)
     
     def set_static_usdt_address(self):
         try:
