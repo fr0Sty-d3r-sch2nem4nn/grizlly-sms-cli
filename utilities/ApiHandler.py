@@ -99,74 +99,103 @@ class ApiHandler:
 
     
     def set_static_usdt_address(self):
-        STATIC_WALLET_FOR_TOP_UP = f"https://api.grizzlysms.com/public/crypto/wallet?api_key={grizzly_api_key}&coin=usdt&network=tron"
+        try:
+            STATIC_WALLET_FOR_TOP_UP = f"https://api.grizzlysms.com/public/crypto/wallet?api_key={grizzly_api_key}&coin=usdt&network=tron"
 
-        request_response = request(method="GET", url=STATIC_WALLET_FOR_TOP_UP)
+            request_response = request(method="GET", url=STATIC_WALLET_FOR_TOP_UP)
 
-        print(f"Your address on Tron Blockchain-Network for top-up of your Grizzly-SMS account\n\nAddress:{request_response.json()['wallet_address']}")
+            print(f"Your address on Tron Blockchain-Network for top-up of your Grizzly-SMS account\n\nAddress:{request_response.json()['wallet_address']}")
         
+        except Exception as error:
+            print("Static error for TRON occured an error", error)
     # methods requiring parameter
     # private methods for retrieval of information for calling the methods
     def __find_country_code_by_name(self, country_name):
-        for key, value in self.__retrieve_country_list().json().items():
-            if value['eng'].lower() == country_name.lower():
-                return int(value['id'])
-        
-        return None
+        try:
+            for key, value in self.__retrieve_country_list().json().items():
+                if value['eng'].lower() == country_name.lower():
+                    return int(value['id'])
+            
+            return None
+        except Exception as error:
+            print("Met an error while trying to find country code:", error)
     
     def __find_service_code_by_name(self, country_name):
-        for service in self.__retrieve_services_list().json()['services']:
-            if service['name'].lower() == country_name.lower():
-                return service['code']
+        try:
+            for service in self.__retrieve_services_list().json()['services']:
+                if service['name'].lower() == country_name.lower():
+                    return service['code']
         
-        return None
+            return None
+        except Exception as error:
+            print("Met an error while trying to find service code:", error)
     
     def __retrieve_country_list(self)->Response:
-        GET_COUNTRIES_ENDPOINT = f"https://api.grizzlysms.com/stubs/handler_api.php?api_key={grizzly_api_key}&action=getCountries"
+        try:
+            GET_COUNTRIES_ENDPOINT = f"https://api.grizzlysms.com/stubs/handler_api.php?api_key={grizzly_api_key}&action=getCountries"
 
-        request_response = request(method="GET", url=GET_COUNTRIES_ENDPOINT)
+            request_response = request(method="GET", url=GET_COUNTRIES_ENDPOINT)
         
-        return request_response
+            return request_response
+        except Exception as error:
+            print("Met an error while trying to retrieve the country list.")
     
     def __retrieve_services_list(self)->Response:
-        GET_SERVICES_ENDPOINT = f"https://grizzlysms.com/stubs/handler_api.php?api_key={grizzly_api_key}&action=getServicesList"
+        try:
+            GET_SERVICES_ENDPOINT = f"https://grizzlysms.com/stubs/handler_api.php?api_key={grizzly_api_key}&action=getServicesList"
 
-        request_response = request(method="GET", url=GET_SERVICES_ENDPOINT)
+            request_response = request(method="GET", url=GET_SERVICES_ENDPOINT)
         
-        return request_response
+            return request_response
+        except Exception as error:
+            print("Met an error while trying to retrieve the services list.")
     
     def handle_parameter_methods(self, args:Namespace, method_name:str):
-        country_code:int = self.__find_country_code_by_name(args.country) if args.country else args.country_code
-        service_code:int = self.__find_service_code_by_name(args.service) if args.service else args.service_code
-        
-        if method_name == 'request_number':
-            self.dynamic_methods[method_name](service_code, country_code, args.max_price, args.min_price, args.excluded_vendors_ids, args.excluded_phone_prefixes, args.allowed_vendors_ids)
-        
-        if method_name == 'service_prices':
-            self.dynamic_methods[method_name](service_code, country_code)
-        
-        if method_name == 'change_activation_status':
-            self.dynamic_methods[method_name](args.status_number, args.activation_id)
-        
-        if method_name == 'activation_status':
-            self.dynamic_methods[method_name](args.activation_id)
-    
+        try:
+            country_code:int = self.__find_country_code_by_name(args.country) if args.country else args.country_code
+            service_code:int = self.__find_service_code_by_name(args.service) if args.service else args.service_code
+
+            if method_name == 'request_number':
+                self.dynamic_methods[method_name](service_code, country_code, args.max_price, args.min_price, args.excluded_vendors_ids, args.excluded_phone_prefixes, args.allowed_vendors_ids)
+
+            if method_name == 'service_prices':
+                self.dynamic_methods[method_name](service_code, country_code)
+
+            if method_name == 'change_activation_status':
+                self.dynamic_methods[method_name](args.status_number, args.activation_id)
+
+            if method_name == 'activation_status':
+                self.dynamic_methods[method_name](args.activation_id)
+        except Exception as error:
+            print("Error occured while executing dynamic method: ", error)
+
     def get_current_service_prices(self, service:int, country:int):
-        
-        if service is None or country is None:
-            raise Exception("Cannot perform any action as one of the inputs required is None")
-        
-        GET_CURRENT_COUNTRY = (
-            f"https://api.grizzlysms.com/stubs/handler_api.php?api_key={grizzly_api_key}&action=getPricesV3&service="
-            f"{service}&country={country}")
+        try:
+            if service is None or country is None:
+                raise Exception("Cannot perform any action as one of the inputs required is None")
 
-        request_response = request(method="GET", url=GET_CURRENT_COUNTRY)
+            GET_CURRENT_COUNTRY = (
+                f"https://api.grizzlysms.com/stubs/handler_api.php?api_key={grizzly_api_key}&action=getPricesV3&service={service}&country={country}")
 
-        print(request_response.json())
-        print(request_response.text)
-        
-        return request_response.json()
-    
+            request_response = request(method="GET", url=GET_CURRENT_COUNTRY)
+            
+            country_name = self.__retrieve_country_list().json()[f'{country}']['eng']
+            
+            print(f"Offers for numbers from {country_name}")
+            
+            service_data = request_response.json()[f'{country}'][f'{service}']
+            
+            print(f"Price: {service_data['price']}$\nAmount of available numbers: {service_data['count']}")
+                
+            if service_data.get('providers'):
+                print(f'\nSpecific Data on providers:\n')
+                for provider_id, provider_offer_data in service_data['providers'].items():
+                    print(f'Provider Id: {provider_id}')
+                    print(f'Amount of available numbers: {provider_offer_data['count']}')
+                    print(f"Vendor's Prices for number: {(provider_offer_data['price'])}\n")
+            
+        except Exception as error:
+            print('Error occured while retriving service prices', error)
     ## Phone number request
     def request_service_number(self,
         service,
@@ -189,29 +218,33 @@ class ApiHandler:
             return request_response.json()
         
         except Exception as error:
-            print(error)
+            print("Error occured while requesting service number:", error)
 
     def alter_activation_status(self, status, _id):
-        ACTIVATION_STATUS_ALTER_ENDPOINT = f"https://api.grizzlysms.com/stubs/handler_api.php?api_key={grizzly_api_key}&action=setStatus&status={status}&id={_id}"
+        try:
+            ACTIVATION_STATUS_ALTER_ENDPOINT = f"https://api.grizzlysms.com/stubs/handler_api.php?api_key={grizzly_api_key}&action=setStatus&status={status}&id={_id}"
 
-        request_response = request(
-            method="POST", url=ACTIVATION_STATUS_ALTER_ENDPOINT
-        )
+            request_response = request(
+                method="POST", url=ACTIVATION_STATUS_ALTER_ENDPOINT
+            )
 
-        print(request_response.text)
-        print(request_response.json())
+            print(request_response.text)
+            print(request_response.json())
 
-        return request_response.json()
-
+            return request_response.json()
+        
+        except Exception as error:
+            print("Error occured while changing activation status: ", error)
 
     def get_activation_status(self, _id):
-        ACTIVATION_STATUS_RETRIEVE_ENDPOINT = f"https://api.grizzlysms.com/stubs/handler_api.php?{grizzly_api_key}=api_key&action=getStatusV2&id={_id}"
+        try:
+            ACTIVATION_STATUS_RETRIEVE_ENDPOINT = f"https://api.grizzlysms.com/stubs/handler_api.php?{grizzly_api_key}=api_key&action=getStatusV2&id={_id}"
 
-        request_response = request(
-            method="GET", url=ACTIVATION_STATUS_RETRIEVE_ENDPOINT
-        )
+            request_response = request(method="GET", url=ACTIVATION_STATUS_RETRIEVE_ENDPOINT)
 
-        print(request_response.text)
-        print(request_response.json())
+            print(request_response.text)
+            print(request_response.json())
 
-        return request_response.json()
+            return request_response.json()
+        except Exception as error:
+            print("Error occured while retrieving activation status: ", error)
