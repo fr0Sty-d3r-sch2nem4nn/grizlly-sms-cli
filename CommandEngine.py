@@ -18,10 +18,11 @@ class CommandEngine:
                 # print(arg_tuple)
                 if self.api_handler.static_methods.get(arg_tuple[0]) and arg_tuple[1]:
                     self.api_handler.static_methods[arg_tuple[0]]()
-                    return
+                    break
                 
-            
-            self.api_handler.handle_parameter_methods(self.arguments)
+                if self.api_handler.dynamic_methods.get(arg_tuple[0]) and arg_tuple[1]:
+                    self.api_handler.handle_parameter_methods(self.arguments, arg_tuple[0])
+                    break
         
         except Exception as error:
             print("Command run error: ", error)

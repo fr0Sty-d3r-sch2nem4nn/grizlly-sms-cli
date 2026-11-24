@@ -3,7 +3,7 @@ import json
 from os import environ
 
 from dotenv import load_dotenv
-from requests import request
+from requests import request, Response
 
 load_dotenv()
 
@@ -23,8 +23,8 @@ class ApiHandler:
         self.dynamic_methods = {
             'service_prices': self.get_current_service_prices,
             'request_number': self.request_service_number,
-            'actication_status': self.get_activation_status,
-            'change_status': self.alter_activation_status
+            'activation_status': self.get_activation_status,
+            'change_activation_status': self.alter_activation_status
         }
 
     def provide_api_key(self):
@@ -50,12 +50,10 @@ class ApiHandler:
         request_response = self.__retrieve_country_list()
         
         with open("countries.json", "w") as file:
-            json.dump(file, request_response.json())
-
-        print(request_response.text)
-        print(request_response.json())
+            json.dump(request_response.json(), file, indent=3)
         
-        return request_response.json()
+        for key, value in request_response.json().items():
+            print(f'Country Name: {value['eng']}, Grizzly-SMS key: {key}\n')
 
     def get_available_services(self):
         try:
@@ -109,40 +107,49 @@ class ApiHandler:
         
     # methods requiring parameter
     # private methods for retrieval of information for calling the methods
-    def __find_country_code_by_name(self, country_name:str):
-        for service in self.__retrieve_country_list():
+    def __find_country_code_by_name(self, country_name):
+        for key, value in self.__retrieve_country_list().json().items():
+            if value['eng'].lower() == country_name.lower():
+                return int(value['id'])
+        
+        return None
+    
+    def __find_service_code_by_name(self, country_name):
+        for service in self.__retrieve_services_list().json()['services']:
             if service['name'].lower() == country_name.lower():
                 return service['code']
         
         return None
     
-    def __find_service_code_by_name(self, country_name:str):
-        for service in self.__retrieve_services_list():
-            if service['name'].lower() == country_name.lower():
-                return service['code']
-        
-        return None
-    
-    def __retrieve_country_list(self):
+    def __retrieve_country_list(self)->Response:
         GET_COUNTRIES_ENDPOINT = f"https://api.grizzlysms.com/stubs/handler_api.php?api_key={grizzly_api_key}&action=getCountries"
 
         request_response = request(method="GET", url=GET_COUNTRIES_ENDPOINT)
         
         return request_response
     
-    def __retrieve_services_list(self):
+    def __retrieve_services_list(self)->Response:
         GET_SERVICES_ENDPOINT = f"https://grizzlysms.com/stubs/handler_api.php?api_key={grizzly_api_key}&action=getServicesList"
 
         request_response = request(method="GET", url=GET_SERVICES_ENDPOINT)
         
         return request_response
     
-    def handle_parameter_methods(self, args:Namespace):
+    def handle_parameter_methods(self, args:Namespace, method_name:str):
         country_code:int = self.__find_country_code_by_name(args.country) if args.country else args.country_code
         service_code:int = self.__find_service_code_by_name(args.service) if args.service else args.service_code
         
-        print("Dynamic method called", args)
+        if method_name == 'request_number':
+            self.dynamic_methods[method_name](service_code, country_code, args.max_price, args.min_price, args.excluded_vendors_ids, args.excluded_phone_prefixes, args.allowed_vendors_ids)
         
+        if method_name == 'service_prices':
+            self.dynamic_methods[method_name](service_code, country_code)
+        
+        if method_name == 'change_activation_status':
+            self.dynamic_methods[method_name](args.status_number, args.activation_id)
+        
+        if method_name == 'activation_status':
+            self.dynamic_methods[method_name](args.activation_id)
     
     def get_current_service_prices(self, service:int, country:int):
         
