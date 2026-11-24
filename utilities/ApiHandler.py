@@ -1,3 +1,4 @@
+from argparse import Namespace
 import json
 from os import environ
 
@@ -17,6 +18,13 @@ class ApiHandler:
             'static_tron_payment_wallet': self.set_static_usdt_address,
             'active_activations': self.get_active_activations_list,
             'balance': self.get_current_balance
+        }
+        
+        self.dynamic_methods = {
+            'service_prices': self.get_current_service_prices,
+            'request_number': self.request_service_number,
+            'actication_status': self.get_activation_status,
+            'change_status': self.alter_activation_status
         }
 
     def provide_api_key(self):
@@ -38,22 +46,21 @@ class ApiHandler:
             print("Error occured while providing api key:", error)
         
     def get_available_countries(self):
-        GET_COUNTRIES_ENDPOINT = f"https://api.grizzlysms.com/stubs/handler_api.php?api_key={grizzly_api_key}&action=getCountries"
-
-        request_response = request(method="GET", url=GET_COUNTRIES_ENDPOINT)
-
+        
+        request_response = self.__retrieve_country_list()
+        
         with open("countries.json", "w") as file:
             json.dump(file, request_response.json())
 
         print(request_response.text)
         print(request_response.json())
+        
+        return request_response.json()
 
     def get_available_services(self):
         try:
-            GET_SERVICES_ENDPOINT = f"https://grizzlysms.com/stubs/handler_api.php?api_key={grizzly_api_key}&action=getServicesList"
-
-            request_response = request(method="GET", url=GET_SERVICES_ENDPOINT)
-
+            request_response = self.__retrieve_services_list()
+            
             with open("services.json", "w") as file:
                 json.dump(request_response.json(), file, indent=3)
 
@@ -61,6 +68,8 @@ class ApiHandler:
                 print(f"Service Name: {service['name']}\nGrizzlySMS Service-Code:{service['code']}\n")
             
             print("The list with services has been saved in services.json")
+            
+            return request_response.json()
 
         except Exception as err:
             print("available services error:", err)
@@ -97,22 +106,60 @@ class ApiHandler:
         request_response = request(method="GET", url=STATIC_WALLET_FOR_TOP_UP)
 
         print(f"Your address on Tron Blockchain-Network for top-up of your Grizzly-SMS account\n\nAddress:{request_response.json()['wallet_address']}")
+        
+    # methods requiring parameter
+    # private methods for retrieval of information for calling the methods
+    def __find_country_code_by_name(self, country_name:str):
+        for service in self.__retrieve_country_list():
+            if service['name'].lower() == country_name.lower():
+                return service['code']
+        
+        return None
+    
+    def __find_service_code_by_name(self, country_name:str):
+        for service in self.__retrieve_services_list():
+            if service['name'].lower() == country_name.lower():
+                return service['code']
+        
+        return None
+    
+    def __retrieve_country_list(self):
+        GET_COUNTRIES_ENDPOINT = f"https://api.grizzlysms.com/stubs/handler_api.php?api_key={grizzly_api_key}&action=getCountries"
 
+        request_response = request(method="GET", url=GET_COUNTRIES_ENDPOINT)
+        
+        return request_response
+    
+    def __retrieve_services_list(self):
+        GET_SERVICES_ENDPOINT = f"https://grizzlysms.com/stubs/handler_api.php?api_key={grizzly_api_key}&action=getServicesList"
 
-    def get_current_prices_country(self, service, country):
+        request_response = request(method="GET", url=GET_SERVICES_ENDPOINT)
+        
+        return request_response
+    
+    def handle_parameter_methods(self, args:Namespace):
+        country_code:int = self.__find_country_code_by_name(args.country) if args.country else args.country_code
+        service_code:int = self.__find_service_code_by_name(args.service) if args.service else args.service_code
+        
+        print("Dynamic method called", args)
+        
+    
+    def get_current_service_prices(self, service:int, country:int):
+        
+        if service is None or country is None:
+            raise Exception("Cannot perform any action as one of the inputs required is None")
+        
         GET_CURRENT_COUNTRY = (
             f"https://api.grizzlysms.com/stubs/handler_api.php?api_key={grizzly_api_key}&action=getPricesV3&service="
-            f"{service}&country={country}"
-        )
+            f"{service}&country={country}")
 
         request_response = request(method="GET", url=GET_CURRENT_COUNTRY)
 
         print(request_response.json())
         print(request_response.text)
         
-
         return request_response.json()
-
+    
     ## Phone number request
     def request_service_number(self,
         service,

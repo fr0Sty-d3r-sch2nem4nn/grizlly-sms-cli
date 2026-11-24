@@ -19,6 +19,9 @@ class CommandEngine:
                 if self.api_handler.static_methods.get(arg_tuple[0]) and arg_tuple[1]:
                     self.api_handler.static_methods[arg_tuple[0]]()
                     return
+                
+            
+            self.api_handler.handle_parameter_methods(self.arguments)
         
         except Exception as error:
             print("Command run error: ", error)
