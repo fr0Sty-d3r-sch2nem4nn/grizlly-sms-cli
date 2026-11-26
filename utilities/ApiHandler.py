@@ -12,19 +12,19 @@ grizzly_api_key = environ.get("GRIZZLY_API_KEY")
 class ApiHandler:
     def __init__(self):
         self.static_methods = {
-            'initialize': self.provide_api_key,
-            'services_list': self.get_available_services,
-            'countries_list': self.get_available_countries,
-            'static_tron_payment_wallet': self.set_static_usdt_address,
-            'active_activations': self.get_active_activations_list,
+            'init': self.provide_api_key,
+            'service-list': self.get_available_services,
+            'country-list': self.get_available_countries,
+            'topup-wallet': self.set_static_usdt_address,
+            'active-activations': self.get_active_activations_list,
             'balance': self.get_current_balance
         }
         
         self.dynamic_methods = {
-            'service_prices': self.get_current_service_prices,
-            'request_number': self.request_service_number,
-            'activation_status': self.get_activation_status,
-            'change_activation_status': self.alter_activation_status
+            'get-service-price': self.get_current_service_prices,
+            'request-number': self.request_service_number,
+            'get-status': self.get_activation_status,
+            'change-status': self.alter_activation_status
         }
 
     def provide_api_key(self):
@@ -158,17 +158,19 @@ class ApiHandler:
         try:
             country_code:int = self.__find_country_code_by_name(args.country) if args.country else args.country_code
             service_code:int = self.__find_service_code_by_name(args.service) if args.service else args.service_code
-
-            if method_name == 'request_number':
+            
+            print("Request sent...")
+            
+            if method_name == 'request-number':
                 self.dynamic_methods[method_name](service_code, country_code, args.max_price, args.min_price, args.excluded_vendors_ids, args.excluded_phone_prefixes, args.allowed_vendors_ids)
 
-            if method_name == 'service_prices':
+            if method_name == 'get-service-price':
                 self.dynamic_methods[method_name](service_code, country_code)
 
-            if method_name == 'change_activation_status':
+            if method_name == 'change-status':
                 self.dynamic_methods[method_name](args.status_number, args.activation_id)
 
-            if method_name == 'activation_status':
+            if method_name == 'get-status':
                 self.dynamic_methods[method_name](args.activation_id)
         except Exception as error:
             print("Error occured while executing dynamic method: ", error)
