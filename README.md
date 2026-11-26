@@ -18,3 +18,19 @@ you are interested in. This tool can provide you detailed informations like the 
 
 
 **PROJECT IS CURRENTLY IN CONSTRUCTION ! THE DOCUMENTATION IS TO BE FINISHED.**
+
+## Donations
+
+If you would like to say a tiny thank you to our work, we would be over the moon if you donate us, below you see the options you could donate us by:
+
+Monero (XMR):
+`4AZsXGX5PmnQsotKi7KydVTyfhrNcqRzeKW4yG3pJ3kbjQJJ9ntCpDY75XKSchKiyUJWv3UjwNFyt8U8cU7zJt9fNhmcstF`
+
+Ethereum (ETH):
+`0x998d94002eAe519aDBb25c1380e0d8b4276F781B`
+
+Bitcoin (BTC):
+`1BTcv4TutyPA1vRsxEch6yL5nAkXKxs4hM`
+
+Solana (SOL):
+`JAGenrdv7JxTLUaBKP77u9mEtpY6iDAYA2aesQTfT2eM`
