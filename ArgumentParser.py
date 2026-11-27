@@ -10,7 +10,7 @@ class ArgsHandler:
         subparsers = self.parser.add_subparsers(dest='command', title=None, description=None, metavar='Available subcommands:', required=True)
         common = argparse.ArgumentParser(add_help=False)
         
-        init_cmd = subparsers.add_parser('init', help="Initalizes the .env file or overwrites it once created.", parents=[common])
+        init_cmd = subparsers.add_parser('init', aliases=['i'], help="Initalizes the .env file or overwrites it once created.", parents=[common])
         
         default_arguments_group = common.add_argument_group('Default Arguments')
         default_arguments_group.add_argument('-c', '--country', help="The name of the phone-number's country you want to get the service for.", type=str)
@@ -32,20 +32,20 @@ class ArgsHandler:
         common.add_argument('-s', '--save', help='This flag allows to store the records of e.g. countries or services list, but also the details on specific services and vendors offers details.', action='store_true')
         
         # static no 
-        static_tron_wallet_parser = subparsers.add_parser('topup-wallet', help="Generates an address which you can use to replenish your Grizzly SMS balance with.", parents=[common])
-        balance_parser = subparsers.add_parser('balance', help="Displays user's current balance in USD in GrizzlySMS.", parents=[common])
-        services_list_parser = subparsers.add_parser('service-list', help='Displays all available services in GrizzlySMS.', parents=[common])
-        country_list_parser = subparsers.add_parser('country-list', help='Displays all available countries in GrizzlySMS which you can get phone number for your services from.', parents=[common])
-        active_activations = subparsers.add_parser('active-activations',help='Displays all active phone-number orders.', parents=[common])
+        static_tron_wallet_parser = subparsers.add_parser('topup-wallet', aliases=['tw'], help="Generates an address which you can use to replenish your Grizzly SMS balance with.")
+        balance_parser = subparsers.add_parser('balance', aliases=['bal'], help="Displays user's current balance in USD in GrizzlySMS.")
+        services_list_parser = subparsers.add_parser('service-list', aliases=['sl'], help='Displays all available services in GrizzlySMS.')
+        country_list_parser = subparsers.add_parser('country-list', aliases=['cl'], help='Displays all available countries in GrizzlySMS which you can get phone number for your services from.')
+        active_activations = subparsers.add_parser('active-activations', aliases=['aa'], help='Displays all active phone-number orders.')
         
-        service_prices_cmd = subparsers.add_parser('get-service-price', help='Displays detailed information on the service prices', parents=[common])
+        service_prices_cmd = subparsers.add_parser('get-service-price', aliases=['gsp'], help='Displays detailed information on the service prices', parents=[common])
         service_prices_cmd.add_argument_group(default_arguments_group)
         
-        req_cmd = subparsers.add_parser('request-number', help='Request a number', parents=[common])
+        req_cmd = subparsers.add_parser('request-number', aliases=['rn'], help='Request a number', parents=[common])
         req_cmd.add_argument_group(default_arguments_group)
         req_cmd.add_argument_group(phone_request_group)
         
-        activation_status_parser = subparsers.add_parser('get-status', help="Display activation status of the phone-number order.", parents=[common])
-        change_activation_status_parser = subparsers.add_parser('change-status', help='Sends a request for a phone number for specific service.', parents=[common])
+        activation_status_parser = subparsers.add_parser('get-status', aliases=['gs'], help="Display activation status of the phone-number order.", parents=[common])
+        change_activation_status_parser = subparsers.add_parser('change-status', aliases=['chs'], help='Sends a request for a phone number for specific service.', parents=[common])
 
         self.arguments=self.parser.parse_args(sys.argv[1:])

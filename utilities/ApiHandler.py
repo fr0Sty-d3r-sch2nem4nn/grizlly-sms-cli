@@ -13,18 +13,28 @@ class ApiHandler:
     def __init__(self):
         self.static_methods = {
             'init': self.provide_api_key,
+            'i': self.provide_api_key, 
             'service-list': self.get_available_services,
+            'sl': self.get_available_services,
             'country-list': self.get_available_countries,
+            'cl': self.get_available_countries,
             'topup-wallet': self.set_static_usdt_address,
+            'tw': self.set_static_usdt_address,
             'active-activations': self.get_active_activations_list,
-            'balance': self.get_current_balance
+            'aa': self.get_active_activations_list,
+            'balance': self.get_current_balance,
+            'bal': self.get_current_balance
         }
         
         self.dynamic_methods = {
             'get-service-price': self.get_current_service_prices,
+            'gsp': self.get_current_service_prices,
             'request-number': self.request_service_number,
+            'rn': self.request_service_number,
             'get-status': self.get_activation_status,
-            'change-status': self.alter_activation_status
+            'gs': self.get_activation_status,
+            'change-status': self.alter_activation_status,
+            'cs': self.alter_activation_status
         }
 
     def provide_api_key(self):
@@ -123,6 +133,7 @@ class ApiHandler:
             return None
         except Exception as error:
             print("Met an error while trying to find country code:", error)
+    
     
     def __find_service_code_by_name(self, country_name):
         try:

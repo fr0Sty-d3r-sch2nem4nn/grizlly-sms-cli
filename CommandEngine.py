@@ -17,10 +17,13 @@ class CommandEngine:
                 
                 if self.api_handler.static_methods.get(self.arguments.command):
                     self.api_handler.static_methods[self.arguments.command]()
+                    return
                 
                 if self.api_handler.dynamic_methods.get(self.arguments.command):
                     self.api_handler.handle_parameter_methods(self.arguments, self.arguments.command)
-                    
+                    return 
                 
+                raise Exception(f"No command of {self.arguments.command} has been found in the list of commands available.")
+        
         except Exception as error:
             print("Command run error: ", error)
